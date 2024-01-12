@@ -44,7 +44,7 @@ You can then get started building your [Inertia frontend](https://inertiajs.com/
 ### Creating responses
 
 We're creating Inertia responses inside Kirby controllers. You can use the `Inertia::createResponse()` method to correctly format the response.
-The default controller simply runs the `toContentArray()` or `toArray()` methods on the Pages, allowing you to use page models as data sources.
+The default controller simply runs the `toArray()` methods on the Pages. You can override this by creating a custom controller for your page templates.
 
 ```php
 <?php
@@ -55,7 +55,7 @@ use tobimori\Inertia\Inertia;
 return function (Page $page) {
 	return Inertia::createResponse(
 		$page->intendedTemplate(), // the component name passed to inertia
-		$page->toContentArray() ?? $page->toArray() // the props passed to the component
+		$page->toArray() // the props passed to the component
 	);
 };
 ```
