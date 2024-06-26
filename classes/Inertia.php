@@ -96,6 +96,8 @@ class Inertia
 			$data['version'] = $version;
 		}
 
+		ray($data);
+
 		return $data;
 	}
 
@@ -193,7 +195,6 @@ class Inertia
 	{
 		static::instance()->component($component);
 		static::instance()->props($props);
-
 		return $viewData;
 	}
 
@@ -210,16 +211,17 @@ class Inertia
 	 * Create a Kirby route that returns an Inertia response
 	 * Works similar to https://inertiajs.com/routing#shorthand-routes
 	 */
-	public static function route(string $path, string $component, array $props = [])
+	public static function route(string $path, string $component = 'default', array $props = [], array $viewData = [])
 	{
 		return [
 			'pattern' => $path,
 			'language' => '*',
-			'action' => function () use ($path, $component, $props) {
-				$viewData = static::createResponse($component, $props);
+			'action' => function () use ($path, $component, $props, $viewData) {
+				$viewData = Inertia::createResponse($component, $props);
+
 				return Page::factory([
 					'slug' => Str::slug($path),
-					'template' => 'default',
+					'template' => 'route',
 					'model' => $component,
 					'content' => []
 				])->render($viewData);
