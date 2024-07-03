@@ -96,8 +96,6 @@ class Inertia
 			$data['version'] = $version;
 		}
 
-		ray($data);
-
 		return $data;
 	}
 
