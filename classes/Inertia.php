@@ -24,7 +24,7 @@ class Inertia
 	/**
 	 * Get or set the current response props
 	 */
-	public function props(array $value = null): array
+	public function props(?array $value = null): array
 	{
 		if ($value !== null) {
 			$this->props = $value;
@@ -45,7 +45,7 @@ class Inertia
 	/**
 	 * Get or set the current response props
 	 */
-	public function component(string $value = null): string
+	public function component(?string $value = null): string
 	{
 		if ($value !== null) {
 			$this->component = $value;
@@ -108,7 +108,7 @@ class Inertia
 			return $props;
 		}
 
-		return A::filter($props, fn ($key) => A::has($only, $key), ARRAY_FILTER_USE_KEY);
+		return A::filter($props, fn($key) => A::has($only, $key), ARRAY_FILTER_USE_KEY);
 	}
 
 	/**
@@ -261,13 +261,9 @@ class Inertia
 	 */
 	private static array $instances = [];
 
-	protected function __construct()
-	{
-	}
+	protected function __construct() {}
 
-	protected function __clone()
-	{
-	}
+	protected function __clone() {}
 
 	public function __wakeup()
 	{
