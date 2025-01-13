@@ -2,7 +2,7 @@
   "name": "tobimori/kirby-inertia",
   "description": "Kirby CMS adapter for Inertia.js",
   "type": "kirby-plugin",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0",
   "license": "MIT",
   "homepage": "https://github.com/tobimori/kirby-inertia#readme",
   "authors": [
