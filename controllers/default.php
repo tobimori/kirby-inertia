@@ -15,22 +15,33 @@ return function (Page $page) {
 	$kirby = kirby();
 	if ($kirby->multilang()) {
 		$currentLangCode = $kirby->language()->code();
-		$languages = $kirby->languages();
 		
-		// Add translations info for this page
-		$translations = [];
-		foreach ($languages as $language) {
-			$langCode = $language->code();
-			$translation = $page->translation($langCode);
-			$exists = $translation->exists();
+		// Cache translations at request level to avoid recomputing for multiple pages
+		$cacheKey = 'page_translations_' . $page->id();
+		$request = $kirby->request();
+		
+		if (!$request->data($cacheKey)) {
+			$languages = $kirby->languages();
+			$translations = [];
 			
-			$translations[$langCode] = [
-				'code' => $langCode,
-				'exists' => $exists,
-				'slug' => $exists ? $translation->slug() : null,
-				'url' => $exists ? $page->url($langCode) : null,
-			];
+			foreach ($languages as $language) {
+				$langCode = $language->code();
+				$translation = $page->translation($langCode);
+				$exists = $translation->exists();
+				
+				$translations[$langCode] = [
+					'code' => $langCode,
+					'exists' => $exists,
+					'slug' => $exists ? $translation->slug() : null,
+					'url' => $exists ? $page->url($langCode) : null,
+				];
+			}
+			
+			// Cache the computed translations for this request
+			$request->data($cacheKey, $translations);
 		}
+		
+		$translations = $request->data($cacheKey);
 		$data['translations'] = $translations;
 		
 		// Add current translation info (reuse from translations if available)

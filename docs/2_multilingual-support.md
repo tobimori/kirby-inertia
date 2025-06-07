@@ -213,12 +213,13 @@ If you're getting empty responses from Inertia on a multilingual site, ensure:
 
 ### Missing Translations
 
-- Check that page content files exist for each language (e.g., `page.fr.txt`)
-- Verify language configuration in `site/languages/`
-- Use `translations` data to conditionally show language switcher links
+- Check that page content files exist for each language (e.g., `page.fr.txt`).
+- Verify language configuration of `site/languages/`.
+- Use `translations` data to conditionally show language switcher links.
 
 ### Language Switching
 
-- Use translation URLs from the `translations` object for accurate page switching
-- Fallback to language home URL if page doesn't exist in target language
-- Consider implementing language detection and redirect logic
+- Use translation URLs from the `translations` object for accurate page switching.
+- Fallback to language home URL if page doesn't exist in the target language.
+- Consider implementing language detection and redirect logic.
+
