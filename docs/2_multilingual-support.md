@@ -75,27 +75,20 @@ Each page includes translation information:
 
 ## Configuration
 
-### Shared Multilingual Data
+### Automatic Multilingual Data
 
-To include language context in shared data across all pages, add this to your `site/config/config.php`:
+Multilingual data is **automatically included** in all Inertia responses when your site has multiple languages configured. No additional configuration is required.
+
+The plugin automatically adds `language` and `languages` data to every page response.
+
+If you need to access multilingual data in shared configuration for custom purposes, you can use:
 
 ```php
 use tobimori\Inertia\Inertia;
 
-return [
-    'tobimori.inertia' => [
-        'shared' => array_merge([
-            // Your other shared data  
-            'site' => [
-                'title' => site()->title()->value(),
-                'url' => site()->url(),
-            ],
-            'navigation' => [
-                // your navigation data
-            ],
-        ], Inertia::langData())
-    ]
-];
+// Only use this if you need language data in shared config
+// (Language data is automatically added to all responses)
+$langData = Inertia::langData();
 ```
 
 ### Custom Multilingual Controllers
