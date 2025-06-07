@@ -96,7 +96,64 @@ class Inertia
 			$data['version'] = $version;
 		}
 
+		// add multilingual data if site has multiple languages
+		$kirby = App::instance();
+		if ($kirby->multilang()) {
+			$data['language'] = [
+				'code' => $kirby->language()?->code(),
+				'direction' => $kirby->language()?->direction() ?? 'ltr',
+				'locale' => $kirby->language()?->locale(),
+				'name' => $kirby->language()?->name(),
+				'url' => $kirby->language()?->url(),
+			];
+			
+			$data['languages'] = array_map(function($language) {
+				return [
+					'code' => $language->code(),
+					'direction' => $language->direction(),
+					'locale' => $language->locale(),
+					'name' => $language->name(),
+					'url' => $language->url(),
+					'isDefault' => $language->isDefault(),
+				];
+			}, $kirby->languages()->values());
+		}
+
 		return $data;
+	}
+
+	/**
+	 * Get multilingual shared data for the current site
+	 * This can be used in config to easily add language context to all pages
+	 */
+	public static function multilingualSharedData(): array
+	{
+		$kirby = App::instance();
+		
+		if (!$kirby->multilang()) {
+			return [];
+		}
+		
+		return [
+			'currentLanguage' => [
+				'code' => $kirby->language()?->code(),
+				'direction' => $kirby->language()?->direction() ?? 'ltr',
+				'locale' => $kirby->language()?->locale(),
+				'name' => $kirby->language()?->name(),
+				'url' => $kirby->language()?->url(),
+				'isDefault' => $kirby->language()?->isDefault() ?? false,
+			],
+			'languages' => array_map(function($language) {
+				return [
+					'code' => $language->code(),
+					'direction' => $language->direction(),
+					'locale' => $language->locale(),
+					'name' => $language->name(),
+					'url' => $language->url(),
+					'isDefault' => $language->isDefault(),
+				];
+			}, $kirby->languages()->values()),
+		];
 	}
 
 	/**
