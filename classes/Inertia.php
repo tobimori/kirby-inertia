@@ -125,24 +125,23 @@ class Inertia
 		$languages = iterator_to_array($kirby->languages());
 		
 		return [
-			'currentLanguage' => [
-				'code' => $currentLanguage?->code(),
-				'direction' => $currentLanguage?->direction() ?? 'ltr',
-				'locale' => $currentLanguage?->locale(),
-				'name' => $currentLanguage?->name(),
-				'url' => $currentLanguage?->url(),
-				'isDefault' => $currentLanguage?->isDefault() ?? false,
-			],
-			'languages' => array_map(function($language) {
-				return [
-					'code' => $language->code(),
-					'direction' => $language->direction(),
-					'locale' => $language->locale(),
-					'name' => $language->name(),
-					'url' => $language->url(),
-					'isDefault' => $language->isDefault(),
-				];
-			}, $languages),
+			'currentLanguage' => static::mapLanguageProperties($currentLanguage),
+			'languages' => array_map([static::class, 'mapLanguageProperties'], $languages),
+		];
+	}
+
+	/**
+	 * Map language object properties to array with consistent null handling
+	 */
+	protected static function mapLanguageProperties($language): array
+	{
+		return [
+			'code' => $language?->code(),
+			'direction' => $language?->direction() ?? 'ltr',
+			'locale' => $language?->locale(),
+			'name' => $language?->name(),
+			'url' => $language?->url(),
+			'isDefault' => $language?->isDefault() ?? false,
 		];
 	}
 
