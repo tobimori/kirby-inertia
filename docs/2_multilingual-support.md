@@ -85,7 +85,14 @@ use tobimori\Inertia\Inertia;
 return [
     'tobimori.inertia' => [
         'shared' => array_merge([
-            // Your other shared data
+            // Your other shared data  
+            'site' => [
+                'title' => site()->title()->value(),
+                'url' => site()->url(),
+            ],
+            'navigation' => [
+                // your navigation data
+            ],
         ], Inertia::multilingualSharedData())
     ]
 ];
@@ -125,7 +132,7 @@ Access language data in your Svelte components:
 <script>
     let { language, languages, translations } = $props();
     
-    // Current language
+    // Current language (available as 'language' in page props, 'currentLanguage' in shared data)
     console.log(language.code); // "fr"
     
     // All available languages
@@ -133,19 +140,21 @@ Access language data in your Svelte components:
         console.log(`${lang.name}: ${lang.url}`);
     });
     
-    // Translation URLs for current page
-    Object.values(translations).forEach(translation => {
-        if (translation.exists) {
-            console.log(`${translation.code}: ${translation.url}`);
-        }
-    });
+    // Translation URLs for current page (only available in page-specific data)
+    if (translations) {
+        Object.values(translations).forEach(translation => {
+            if (translation.exists) {
+                console.log(`${translation.code}: ${translation.url}`);
+            }
+        });
+    }
 </script>
 
 <!-- Language switcher -->
 <nav class="language-switcher">
     {#each languages as lang}
         <a 
-            href={translations[lang.code]?.url || lang.url}
+            href={translations?.[lang.code]?.url || lang.url}
             class:active={lang.code === language.code}
         >
             {lang.name}

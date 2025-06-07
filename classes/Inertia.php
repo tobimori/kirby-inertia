@@ -99,24 +99,9 @@ class Inertia
 		// add multilingual data if site has multiple languages
 		$kirby = App::instance();
 		if ($kirby->multilang()) {
-			$data['language'] = [
-				'code' => $kirby->language()?->code(),
-				'direction' => $kirby->language()?->direction() ?? 'ltr',
-				'locale' => $kirby->language()?->locale(),
-				'name' => $kirby->language()?->name(),
-				'url' => $kirby->language()?->url(),
-			];
-			
-			$data['languages'] = array_map(function($language) {
-				return [
-					'code' => $language->code(),
-					'direction' => $language->direction(),
-					'locale' => $language->locale(),
-					'name' => $language->name(),
-					'url' => $language->url(),
-					'isDefault' => $language->isDefault(),
-				];
-			}, $kirby->languages()->values());
+			$multilingualData = static::multilingualSharedData();
+			$data['language'] = $multilingualData['currentLanguage'] ?? null;
+			$data['languages'] = $multilingualData['languages'] ?? [];
 		}
 
 		return $data;
