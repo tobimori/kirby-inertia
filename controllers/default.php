@@ -14,26 +14,37 @@ return function (Page $page) {
 	// Add multilingual page-specific data if site is multilingual
 	$kirby = kirby();
 	if ($kirby->multilang()) {
+		$currentLangCode = $kirby->language()->code();
+		$languages = $kirby->languages();
+		
 		// Add translations info for this page
 		$translations = [];
-		foreach ($kirby->languages() as $language) {
-			$translation = $page->translation($language->code());
-			$translations[$language->code()] = [
-				'code' => $language->code(),
-				'exists' => $translation->exists(),
-				'slug' => $translation->exists() ? $translation->slug() : null,
-				'url' => $translation->exists() ? $page->url($language->code()) : null,
+		foreach ($languages as $language) {
+			$langCode = $language->code();
+			$translation = $page->translation($langCode);
+			$exists = $translation->exists();
+			
+			$translations[$langCode] = [
+				'code' => $langCode,
+				'exists' => $exists,
+				'slug' => $exists ? $translation->slug() : null,
+				'url' => $exists ? $page->url($langCode) : null,
 			];
 		}
 		$data['translations'] = $translations;
 		
-		// Add current translation info
-		$currentTranslation = $page->translation($kirby->language()->code());
-		$data['translation'] = [
-			'code' => $kirby->language()->code(),
-			'exists' => $currentTranslation->exists(),
-			'slug' => $currentTranslation->exists() ? $currentTranslation->slug() : null,
-		];
+		// Add current translation info (reuse from translations if available)
+		if (isset($translations[$currentLangCode])) {
+			$data['translation'] = $translations[$currentLangCode];
+		} else {
+			$currentTranslation = $page->translation($currentLangCode);
+			$exists = $currentTranslation->exists();
+			$data['translation'] = [
+				'code' => $currentLangCode,
+				'exists' => $exists,
+				'slug' => $exists ? $currentTranslation->slug() : null,
+			];
+		}
 	}
 
 	return Inertia::createResponse(

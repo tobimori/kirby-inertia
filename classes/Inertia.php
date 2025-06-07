@@ -39,7 +39,11 @@ class Inertia
 	 */
 	public function sharedProps(): array
 	{
-		return A::merge(App::instance()->option('tobimori.inertia.shared', []), $this->sharedProps);
+		static $configProps = null;
+		if ($configProps === null) {
+			$configProps = App::instance()->option('tobimori.inertia.shared', []);
+		}
+		return A::merge($configProps, $this->sharedProps);
 	}
 
 	/**
@@ -97,11 +101,17 @@ class Inertia
 		}
 
 		// add multilingual data if site has multiple languages
-		$kirby = App::instance();
+		static $kirby = null;
+		if ($kirby === null) {
+			$kirby = App::instance();
+		}
+		
 		if ($kirby->multilang()) {
-			$multilingualData = static::multilingualSharedData();
-			$data['language'] = $multilingualData['currentLanguage'] ?? null;
-			$data['languages'] = $multilingualData['languages'] ?? [];
+			$multilingualData = static::langData();
+			if (!empty($multilingualData)) {
+				$data['language'] = $multilingualData['currentLanguage'];
+				$data['languages'] = $multilingualData['languages'];
+			}
 		}
 
 		return $data;
@@ -111,34 +121,46 @@ class Inertia
 	 * Get multilingual shared data for the current site
 	 * This can be used in config to easily add language context to all pages
 	 */
-	public static function multilingualSharedData(): array
+	public static function langData(): array
 	{
-		$kirby = App::instance();
+		static $kirby = null;
+		static $cachedData = null;
+		
+		if ($kirby === null) {
+			$kirby = App::instance();
+		}
 		
 		if (!$kirby->multilang()) {
 			return [];
 		}
 		
-		return [
-			'currentLanguage' => [
-				'code' => $kirby->language()?->code(),
-				'direction' => $kirby->language()?->direction() ?? 'ltr',
-				'locale' => $kirby->language()?->locale(),
-				'name' => $kirby->language()?->name(),
-				'url' => $kirby->language()?->url(),
-				'isDefault' => $kirby->language()?->isDefault() ?? false,
-			],
-			'languages' => array_map(function($language) {
-				return [
-					'code' => $language->code(),
-					'direction' => $language->direction(),
-					'locale' => $language->locale(),
-					'name' => $language->name(),
-					'url' => $language->url(),
-					'isDefault' => $language->isDefault(),
-				];
-			}, $kirby->languages()->values()),
-		];
+		if ($cachedData === null) {
+			$currentLanguage = $kirby->language();
+			$languages = iterator_to_array($kirby->languages());
+			
+			$cachedData = [
+				'currentLanguage' => [
+					'code' => $currentLanguage?->code(),
+					'direction' => $currentLanguage?->direction() ?? 'ltr',
+					'locale' => $currentLanguage?->locale(),
+					'name' => $currentLanguage?->name(),
+					'url' => $currentLanguage?->url(),
+					'isDefault' => $currentLanguage?->isDefault() ?? false,
+				],
+				'languages' => array_map(function($language) {
+					return [
+						'code' => $language->code(),
+						'direction' => $language->direction(),
+						'locale' => $language->locale(),
+						'name' => $language->name(),
+						'url' => $language->url(),
+						'isDefault' => $language->isDefault(),
+					];
+				}, $languages),
+			];
+		}
+		
+		return $cachedData;
 	}
 
 	/**
@@ -172,13 +194,17 @@ class Inertia
 			]));
 		}
 
-		$ssr = App::instance()->option('tobimori.inertia.ssr.enabled', true);
+		static $kirby = null;
+		if ($kirby === null) {
+			$kirby = App::instance();
+		}
+		$ssr = $kirby->option('tobimori.inertia.ssr.enabled', true);
 		if (is_callable($ssr)) {
 			$ssr = $ssr();
 		}
 
 		if ($ssr) {
-			$response = $this->handleSsrRequest('body');
+			$response = $this->handleSsrRequest('body', $kirby);
 			if ($response !== null) {
 				return $response;
 			}
@@ -187,7 +213,7 @@ class Inertia
 		// generate the app container element
 		$doc = new \DOMDocument();
 		$root = $doc->createElement('div');
-		$root->setAttribute('id', App::instance()->option('tobimori.inertia.id', 'app'));
+		$root->setAttribute('id', $kirby->option('tobimori.inertia.id', 'app'));
 		$root->setAttribute('data-page', Json::encode($this->data()));
 		$doc->appendChild($root);
 		return $doc->saveHTML($root);
@@ -198,18 +224,26 @@ class Inertia
 	 */
 	public function head(): string
 	{
-		return $this->handleSsrRequest('head') ?? '';
+		static $kirby = null;
+		if ($kirby === null) {
+			$kirby = App::instance();
+		}
+		return $this->handleSsrRequest('head', $kirby) ?? '';
 	}
 
 	/**
 	 * Handles the SSR server request
 	 */
-	protected function handleSsrRequest(string $component = 'body'): string|null
+	protected function handleSsrRequest(string $component = 'body', ?App $kirby = null): string|null
 	{
+		if ($kirby === null) {
+			$kirby = App::instance();
+		}
+		
 		if (!isset($this->ssrResponse[$component])) {
 			try {
 				// create a new request
-				$url = Str::replace(App::instance()->option('tobimori.inertia.ssr.server', 'http://127.0.0.1:13714'), '/render', '') . '/render';
+				$url = Str::replace($kirby->option('tobimori.inertia.ssr.server', 'http://127.0.0.1:13714'), '/render', '') . '/render';
 				$request = Remote::request($url, [
 					'method' => 'POST',
 					'data' => Json::encode($this->data()),
@@ -295,7 +329,11 @@ class Inertia
 	 */
 	protected static function request(): Request
 	{
-		return App::instance()->request();
+		static $kirby = null;
+		if ($kirby === null) {
+			$kirby = App::instance();
+		}
+		return $kirby->request();
 	}
 
 	/**

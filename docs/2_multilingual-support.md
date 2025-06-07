@@ -93,7 +93,7 @@ return [
             'navigation' => [
                 // your navigation data
             ],
-        ], Inertia::multilingualSharedData())
+        ], Inertia::langData())
     ]
 ];
 ```
