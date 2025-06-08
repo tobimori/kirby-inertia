@@ -83,13 +83,6 @@ The plugin automatically adds `language` and `languages` data to every page resp
 
 If you need to access multilingual data in shared configuration for custom purposes, you can use:
 
-```php
-use tobimori\Inertia\Inertia;
-
-// Only use this if you need language data in shared config
-// (Language data is automatically added to all responses)
-$langData = Inertia::langData();
-```
 
 ### Custom Multilingual Controllers
 
