@@ -96,7 +96,53 @@ class Inertia
 			$data['version'] = $version;
 		}
 
+		// add multilingual data if site has multiple languages
+		$kirby = App::instance();
+		if ($kirby->multilang()) {
+			$multilingualData = static::langData();
+			if (!empty($multilingualData)) {
+				$data['language'] = $multilingualData['currentLanguage'];
+				$data['languages'] = $multilingualData['languages'];
+			}
+		}
+
 		return $data;
+	}
+
+	/**
+	 * Get multilingual shared data for the current site
+	 * This can be used in config to easily add language context to all pages
+	 */
+	public static function langData(): array
+	{
+		$kirby = App::instance();
+		
+		if (!$kirby->multilang()) {
+			return [];
+		}
+		
+		$currentLanguage = $kirby->language();
+		$languages = iterator_to_array($kirby->languages());
+		
+		return [
+			'currentLanguage' => static::mapLanguageProperties($currentLanguage),
+			'languages' => array_map([static::class, 'mapLanguageProperties'], $languages),
+		];
+	}
+
+	/**
+	 * Map language object properties to array with consistent null handling
+	 */
+	protected static function mapLanguageProperties($language): array
+	{
+		return [
+			'code' => $language?->code(),
+			'direction' => $language?->direction() ?? 'ltr',
+			'locale' => $language?->locale(),
+			'name' => $language?->name(),
+			'url' => $language?->url(),
+			'isDefault' => $language?->isDefault() ?? false,
+		];
 	}
 
 	/**
